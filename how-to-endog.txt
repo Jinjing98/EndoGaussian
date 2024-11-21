@@ -1,0 +1,18 @@
+
+
+********************train/*************************
+(misgs) jinjingxu@g27ws0018:/mnt/ceph/tco/TCO-Staff/Homes/jinjing/proj/gs/baselines/EndoGaussian$ python train.py \
+-s /mnt/cluster/datasets/EndoNeRF/pulling \
+--port 6017 \
+--expname /mnt/ceph/tco/TCO-Staff/Homes/jinjing/exps/train/gs/debug/EndoNeRF/pulling31 \
+--configs arguments/endonerf/pulling.py 
+
+
+******seems not possible with sibw** *vis**train**********
+(need ssh -X 18 then use wine+sibw)----sibw only support only vis of dataset reformulated with drivestudio(colmap format :( )
+jinjingxu@g27ws0018:~$ wine apps/viewer/bin/SIBR_remoteGaussian_app.exe --port 6017
+
+jinjingxu@g27ws0018:~$ /mnt/ceph/tco/TCO-Staff/Homes/jinjing/proj/gs/gaussian-splatting/SIBR_viewers/install/bin/SIBR_gaussianViewer_app --model-path /mnt/ceph/tco/TCO-Staff/Homes/jinjing/exps/train/gs/debug/EndoNeRF/pulling31
+
+
+python render.py --model_path output/endonerf/pulling  --skip_train --skip_video --configs arguments/endonerf/pulling.py

@@ -17,7 +17,7 @@ from utils.general_utils import PILtoTorch
 from utils.graphics_utils import getWorld2View2, focal2fov, fov2focal
 import glob
 from torchvision import transforms as T
-import open3d as o3d
+# import open3d as o3d
 from tqdm import trange
 import imageio.v2 as iio
 import cv2

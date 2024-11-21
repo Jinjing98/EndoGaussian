@@ -22,7 +22,7 @@ from argparse import ArgumentParser
 from arguments import ModelParams, PipelineParams, get_combined_args, ModelHiddenParams
 from gaussian_renderer import GaussianModel
 from time import time
-import open3d as o3d
+# import open3d as o3d
 from utils.graphics_utils import fov2focal
 import cv2
 

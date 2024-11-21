@@ -187,6 +187,7 @@ def scene_reconstruction(dataset, opt, hyper, pipe, testing_iterations, saving_i
             if iteration == train_iter:
                 progress_bar.close()
 
+            # print(f'//////////////dbg time, elapsed:{timer.get_elapsed_time()} ')
             # Log and save
             timer.pause()
             training_report(tb_writer, iteration, Ll1, loss, l1_loss, iter_start.elapsed_time(iter_end), testing_iterations, scene, render, [pipe, background], stage)
@@ -200,6 +201,8 @@ def scene_reconstruction(dataset, opt, hyper, pipe, testing_iterations, saving_i
                             or (iteration < 60000 and iteration % 100 ==1):
                     render_training_image(scene, gaussians, video_cams, render, pipe, background, stage, iteration-1,timer.get_elapsed_time())
             timer.start()
+            # print(f'///////////dbg time after log,elapsed:{timer.get_elapsed_time()} ')
+
             
             # Densification
             if iteration < opt.densify_until_iter :
