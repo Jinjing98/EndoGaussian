@@ -160,7 +160,7 @@ def evaluate(model_paths):
                     rmses.append(rmse(depth, gt_depth))
                 
                 flipped_metrics = flip([to8b(e) for e in render_wmask], [to8b(g) for g in gt_wmask], interval=10)
-
+                print('Eval use tool_mask...')
                 print("Scene: ", scene_dir,  "SSIM : {:>12.7f}".format(torch.tensor(ssims).mean(), ".5"))
                 print("Scene: ", scene_dir,  "PSNR : {:>12.7f}".format(torch.tensor(psnrs).mean(), ".5"))
                 print("Scene: ", scene_dir,  "PSNR* : {:>12.7f}".format(torch.tensor(psnrs_star).mean(), ".5"))

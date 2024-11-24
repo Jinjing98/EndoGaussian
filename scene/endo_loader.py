@@ -48,8 +48,11 @@ class EndoNeRF_Dataset(object):
         datadir,
         downsample=1.0,
         test_every=8,
-        mode='binocular'
+        mode='binocular',
+        tool_mask = 'use',
     ):
+        assert tool_mask in ['use','nouse','inverse']
+        
         self.img_wh = (
             int(640 / downsample),
             int(512 / downsample),
@@ -70,6 +73,9 @@ class EndoNeRF_Dataset(object):
         self.video_idxs = [i for i in range(n_frames)]
         
         self.maxtime = 1.0
+
+        #extend
+        self.tool_mask = tool_mask
         
     def load_meta(self):
         """
@@ -128,7 +134,15 @@ class EndoNeRF_Dataset(object):
             # mask / depth
             mask_path = self.masks_paths[idx]
             mask = Image.open(mask_path)
-            mask = 1 - np.array(mask) / 255.0
+            # here adjust mask....
+            if self.tool_mask == 'use':
+                mask = 1 - np.array(mask) / 255.0
+            elif self.tool_mask == 'inverse':
+                mask = np.array(mask) / 255.0
+            elif self.tool_mask == 'nouse':
+                mask = np.ones_like(mask)
+            else:
+                assert 0
             depth_path = self.depth_paths[idx]
             if self.mode == 'binocular':
                 depth = np.array(Image.open(depth_path))

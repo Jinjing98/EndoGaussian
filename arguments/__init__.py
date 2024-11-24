@@ -60,6 +60,9 @@ class ModelParams(ParamGroup):
         self.mode = 'binocular'
         self.no_fine = False
         self.init_pts = 200_000
+
+        #extend
+        self.tool_mask = None
         super().__init__(parser, "Loading Parameters", sentinel)
 
     def extract(self, args):

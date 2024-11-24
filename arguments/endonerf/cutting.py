@@ -1,6 +1,9 @@
 ModelParams = dict(
     extra_mark = 'endonerf',
-    camera_extent = 10
+    camera_extent = 10,
+
+    tool_mask = 'nouse',#'nouse',#'use', #'inverse'
+
 )
 
 OptimizationParams = dict(

@@ -328,7 +328,7 @@ if __name__ == "__main__":
     torch.cuda.empty_cache()
     parser = ArgumentParser(description="Training script parameters")
     setup_seed(6666)
-    lp = ModelParams(parser)
+    lp = ModelParams(parser) # it will def tool_mask internally
     op = OptimizationParams(parser)
     pp = PipelineParams(parser)
     hp = ModelHiddenParams(parser)
@@ -350,6 +350,10 @@ if __name__ == "__main__":
         from utils.params_utils import merge_hparams
         config = mmcv.Config.fromfile(args.configs)
         args = merge_hparams(args, config)
+        #update with tool_info automatically
+        if hasattr(args,'tool_mask'):
+            setattr(args, 'expname', f'{args.expname}_{args.tool_mask}')
+        
     print("Optimizing " + args.model_path)
 
     # Initialize system state (RNG)
