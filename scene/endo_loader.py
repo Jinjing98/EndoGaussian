@@ -226,7 +226,17 @@ class EndoNeRF_Dataset(object):
             depth[depth!=0] = (1 / depth[depth!=0])*0.4
             depth[depth==0] = depth.max()
 
-        mask = 1 - np.array(Image.open(self.masks_paths[idx]))/255.0
+        # mask = 1 - np.array(Image.open(self.masks_paths[idx]))/255.0
+        mask = Image.open(self.masks_paths[idx])
+        # here adjust mask....
+        if self.tool_mask == 'use':
+            mask = 1 - np.array(mask) / 255.0
+        elif self.tool_mask == 'inverse':
+            mask = np.array(mask) / 255.0
+        elif self.tool_mask == 'nouse':
+            mask = np.ones_like(mask)
+        else:
+            assert 0
         color = np.array(Image.open(self.image_paths[idx]))/255.0
         return color, depth, mask
              
