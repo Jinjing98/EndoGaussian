@@ -116,15 +116,42 @@ def readColmapCameras(cam_extrinsics, cam_intrinsics, images_folder):
     sys.stdout.write('\n')
     return cam_infos
 
-def fetchPly(path):
-    plydata = PlyData.read(path)
+# def fetchPly(path):
+#     plydata = PlyData.read(path)
+#     vertices = plydata['vertex']
+#     positions = np.vstack([vertices['x'], vertices['y'], vertices['z']]).T
+#     colors = np.vstack([vertices['red'], vertices['green'], vertices['blue']]).T / 255.0
+#     normals = np.vstack([vertices['nx'], vertices['ny'], vertices['nz']]).T
+#     return BasicPointCloud(points=positions, colors=colors, normals=normals)
+
+# def storePly(path, xyz, rgb):
+#     # Define the dtype for the structured array
+#     dtype = [('x', 'f4'), ('y', 'f4'), ('z', 'f4'),
+#             ('nx', 'f4'), ('ny', 'f4'), ('nz', 'f4'),
+#             ('red', 'u1'), ('green', 'u1'), ('blue', 'u1')]
+    
+#     normals = np.zeros_like(xyz)
+#     elements = np.empty(xyz.shape[0], dtype=dtype)
+#     attributes = np.concatenate((xyz, normals, rgb), axis=1)
+#     elements[:] = list(map(tuple, attributes))
+
+#     # Create the PlyData object and write to file
+#     vertex_element = PlyElement.describe(elements, 'vertex')
+#     ply_data = PlyData([vertex_element])
+#     ply_data.write(path)
+
+def fetchPly(path = None, plydata = None):
+    if path == None:
+        assert plydata != None
+    else:
+        plydata = PlyData.read(path)
     vertices = plydata['vertex']
     positions = np.vstack([vertices['x'], vertices['y'], vertices['z']]).T
     colors = np.vstack([vertices['red'], vertices['green'], vertices['blue']]).T / 255.0
     normals = np.vstack([vertices['nx'], vertices['ny'], vertices['nz']]).T
     return BasicPointCloud(points=positions, colors=colors, normals=normals)
 
-def storePly(path, xyz, rgb):
+def storePly(path, xyz, rgb, wo_write = False):
     # Define the dtype for the structured array
     dtype = [('x', 'f4'), ('y', 'f4'), ('z', 'f4'),
             ('nx', 'f4'), ('ny', 'f4'), ('nz', 'f4'),
@@ -138,7 +165,11 @@ def storePly(path, xyz, rgb):
     # Create the PlyData object and write to file
     vertex_element = PlyElement.describe(elements, 'vertex')
     ply_data = PlyData([vertex_element])
-    ply_data.write(path)
+    if not wo_write:
+        ply_data.write(path)
+    return ply_data
+
+
 
 def readColmapSceneInfo(path, images, eval, llffhold=8):
     try:
@@ -175,7 +206,6 @@ def readColmapSceneInfo(path, images, eval, llffhold=8):
         except:
             xyz, rgb, _ = read_points3D_text(txt_path)
         storePly(ply_path, xyz, rgb)
-    
     try:
         pcd = fetchPly(ply_path)
         
@@ -214,10 +244,13 @@ def readEndoNeRFInfo(datadir, mode, tool_mask = 'use'):
     
     normals = np.random.random((xyz.shape[0], 3))
     pcd = BasicPointCloud(points=xyz, colors=rgb, normals=normals)
-    storePly(ply_path, xyz,rgb*255)
+    # storePly(ply_path, xyz,rgb*255)  # the points3d.ply is not used at all, try not touch the src dataset
+    plydata = storePly(ply_path, xyz,rgb*255, wo_write=True)  # the points3d.ply is not used at all, try not touch the src dataset
+    print('the points3d.ply is not used at all, try not touch the src dataset')
 
     try:
-        pcd = fetchPly(ply_path)
+        # pcd = fetchPly(ply_path)
+        pcd = fetchPly(path = None, plydata = plydata)
     except:
         pcd = None
     

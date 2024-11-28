@@ -273,7 +273,10 @@ def training_report(tb_writer, iteration, Ll1, loss, l1_loss, elapsed, testing_i
         tb_writer.add_scalar(f'{stage}/train_loss_patches/l1_loss', Ll1.item(), iteration)
         tb_writer.add_scalar(f'{stage}/train_loss_patchestotal_loss', loss.item(), iteration)
         tb_writer.add_scalar(f'{stage}/iter_time', elapsed, iteration)
-    
+        #jj    
+        tb_writer.add_scalar('total_points', scene.gaussians.get_xyz.shape[0], iteration)
+        # tb_writer.add_histogram("scene/opacity_histogram", scene.gaussians.get_opacity, iteration)
+        # torch.cuda.empty_cache()
     # Report test and samples of training set
     '''
     if iteration in testing_iterations:
