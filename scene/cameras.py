@@ -18,10 +18,10 @@ class Camera(nn.Module):
     def __init__(self, colmap_id, R, T, FoVx, FoVy, image, depth, mask, gt_alpha_mask,
                  image_name, uid,
                  trans=np.array([0.0, 0.0, 0.0]), scale=1.0, 
-                 data_device = "cuda", time = 0, Znear=None, Zfar=None
+                 data_device = "cuda", time = 0, Znear=None, Zfar=None,
+                 dataset = None,
                  ):
         super(Camera, self).__init__()
-
         self.uid = uid
         self.colmap_id = colmap_id
         self.R = R
@@ -31,6 +31,8 @@ class Camera(nn.Module):
         self.image_name = image_name
         self.time = time
         self.mask = mask
+        #jj
+        self.dataset = dataset
         try:
             self.data_device = torch.device(data_device)
         except Exception as e:
@@ -51,13 +53,22 @@ class Camera(nn.Module):
             self.zfar = Zfar
             self.znear = Znear
         else:
+            assert dataset in ['EndoNeRF','SCARED','StereoMIS'],dataset
             # ENDONERF
-            self.zfar = 120.0
-            self.znear = 0.01
+            if self.dataset == 'EndoNeRF':
+                self.zfar = 120.0
+                self.znear = 0.01
             # SCARED
-            # self.zfar = 300
-            # self.znear= 0.03
-            
+            elif self.dataset == 'SCARED':
+                self.zfar = 300
+                self.znear= 0.03
+            # StereoMIS #cp from deform3dgs
+            elif self.dataset == 'StereoMIS':
+                self.zfar = 250
+                self.znear= 0.03
+            else:
+                assert 0
+
         self.trans = trans
         self.scale = scale
 

@@ -64,6 +64,18 @@ class EndoNeRF_Dataset(object):
         self.white_bg = False
         self.mode = mode
 
+        #jj
+        if 'pulling' in self.root_dir or 'cutting' in self.root_dir:
+            self.dataset = 'EndoNeRF' 
+        elif 'P2_' in self.root_dir:# fake stereomis as endonerf
+            self.dataset = "StereoMIS"
+        else:
+            assert 0, self.root_dir
+
+        if self.dataset == 'StereoMIS':
+            assert self.mode == 'binocular', NotImplementedError
+
+
         self.load_meta()
         print(f"meta data loaded, total image:{len(self.image_paths)}")
         
@@ -86,6 +98,10 @@ class EndoNeRF_Dataset(object):
         poses = poses_arr[:, :-2].reshape([-1, 3, 5])  # (N_cams, 3, 5)
         # coordinate transformation OpenGL->Colmap, center poses
         H, W, focal = poses[0, :, -1]
+        if (H!=512) or (W!=640):
+            assert self.dataset in ['StereoMIS']
+            print('Hard code dim for stereomis...')
+            H, W = 512, 640
         focal = focal / self.downsample
         self.focal = (focal, focal)
         self.K = np.array([[focal, 0 , W//2],
@@ -100,6 +116,14 @@ class EndoNeRF_Dataset(object):
         for idx in range(poses.shape[0]):
             pose = poses[idx]
             c2w = np.concatenate((pose, np.array([[0, 0, 0, 1]])), axis=0) # 4x4
+            
+            #jj: cp from deform3dgs
+            # # ======================Generate the novel view for infer (StereoMIS)==========================
+            # thetas = np.linspace(0, 30, poses.shape[0], endpoint=False)
+            # c2w = update_extr(c2w, rotation_deg=thetas[idx], radii_mm=30)
+            # # =================================================================================
+            
+
             w2c = np.linalg.inv(c2w)
             R = w2c[:3, :3]
             T = w2c[:3, -1]
@@ -134,6 +158,14 @@ class EndoNeRF_Dataset(object):
             # mask / depth
             mask_path = self.masks_paths[idx]
             mask = Image.open(mask_path)
+            #mask refer to tool are valued
+            if self.dataset in ['StereoMIS']:
+                mask = 255-np.array(mask) 
+            elif self.dataset in ['EndoNeRF']:
+                mask = np.array(mask)  
+            else:
+                assert 0, NotImplementedError
+            
             # here adjust mask....
             if self.tool_mask == 'use':
                 mask = 1 - np.array(mask) / 255.0
@@ -171,7 +203,9 @@ class EndoNeRF_Dataset(object):
             
             cameras.append(Camera(colmap_id=idx,R=R,T=T,FoVx=FovX,FoVy=FovY,image=image, depth=depth, mask=mask, gt_alpha_mask=None,
                           image_name=f"{idx}",uid=idx,data_device=torch.device("cuda"),time=time,
-                          Znear=None, Zfar=None))
+                          Znear=None, Zfar=None,
+                          dataset = self.dataset,#jj to control z near/far
+                          ))
         return cameras
     
     def get_init_pts(self, sampling='random'):
@@ -228,6 +262,15 @@ class EndoNeRF_Dataset(object):
 
         # mask = 1 - np.array(Image.open(self.masks_paths[idx]))/255.0
         mask = Image.open(self.masks_paths[idx])
+
+        #mask refer to tool are valued
+        if self.dataset in ['StereoMIS']:
+            mask = 255-np.array(mask) 
+        elif self.dataset in ['EndoNeRF']:
+            mask = np.array(mask)  
+        else:
+            assert 0, NotImplementedError
+
         # here adjust mask....
         if self.tool_mask == 'use':
             mask = 1 - np.array(mask) / 255.0

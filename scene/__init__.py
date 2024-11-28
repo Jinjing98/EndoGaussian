@@ -13,7 +13,7 @@ import os
 from utils.system_utils import searchForMaxIteration
 from scene.dataset_readers import sceneLoadTypeCallbacks
 from scene.gaussian_model import GaussianModel
-from scene.dataset import FourDGSdataset
+# from scene.dataset import FourDGSdataset
 from arguments import ModelParams
 
 class Scene:
@@ -38,12 +38,13 @@ class Scene:
         
         if os.path.exists(os.path.join(args.source_path, "sparse")) and args.extra_mark is None:
             scene_info = sceneLoadTypeCallbacks["Colmap"](args.source_path, args.images, args.eval)
-        elif os.path.exists(os.path.join(args.source_path, "poses_bounds.npy")) and args.extra_mark == 'endonerf':
+        elif os.path.exists(os.path.join(args.source_path, "poses_bounds.npy")) and args.extra_mark in ['endonerf','stereomis']:
             scene_info = sceneLoadTypeCallbacks["endonerf"](args.source_path, mode=args.mode,
                                                             tool_mask = args.tool_mask,
                                                             )
             print("Found poses_bounds.py and extra marks with EndoNeRf")
-        elif os.path.exists(os.path.join(args.source_path, "point_cloud.obj")) or os.path.exists(os.path.join(args.source_path, "left_point_cloud.obj")):
+        elif (os.path.exists(os.path.join(args.source_path, "point_cloud.obj")) or os.path.exists(os.path.join(args.source_path, "left_point_cloud.obj"))) \
+            and args.extra_mark == 'scared':
             scene_info = sceneLoadTypeCallbacks["scared"](args.source_path, mode=args.mode, init_pts=args.init_pts)
             print("Found point_cloud.obj, assuming SCARED data!")
         else:
